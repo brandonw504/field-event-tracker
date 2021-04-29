@@ -16,27 +16,11 @@ struct Event: Identifiable, Codable {
     var athletes: [Athlete]
     
     var athletesRanked: [Athlete] {
-        // var athletesRanked = [Athlete]()
-        // var nextGreatest = (0, 0.0)
         var localAthletes = athletes
         
         localAthletes.sort { (current: Athlete, next: Athlete) -> Bool in
-            if Double(current.bestResultRanked.0 * 12) + current.bestResultRanked.1 > Double(next.bestResultRanked.0 * 12) + current.bestResultRanked.1 {
-                return true
-            }
-            return false
+            return Double(current.bestResultRanked.0 * 12) + current.bestResultRanked.1 > Double(next.bestResultRanked.0 * 12) + current.bestResultRanked.1
         }
         return localAthletes
-        /*
-        for athlete in athletes {
-            for comparison in athletes {
-                if Double(comparison.bestResultRanked.0 * 12) + comparison.bestResultRanked.1 > Double(athlete.bestResultRanked.0 * 12) + athlete.bestResultRanked.1 {
-                    if Double(comparison.bestResultRanked.0 * 12) + comparison.bestResultRanked.1 < Double(nextGreatest.0 * 12) + nextGreatest.1 {
-                        nextGreatest = (comparison.bestResultRanked.0, comparison.bestResultRanked.1)
-                    }
-                }
-            }
-        }
-        */
     }
 }

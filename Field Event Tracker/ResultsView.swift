@@ -18,27 +18,35 @@ struct ResultsView: View {
     @State private var reinvokeBody = false
     
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(meets.meets[meetID].events[eventID].athletesRanked) { athlete in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("\(athlete.name)")
-                                .font(.headline)
-                            Text("\(athlete.school)")
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                NavigationView {
+                    List {
+                        if meets.meets[meetID].events[eventID].athletes.isEmpty {
+                            Text("No results to display.")
+                        } else {
+                            ForEach(meets.meets[meetID].events[eventID].athletesRanked) { athlete in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("\(athlete.name)")
+                                            .font(.headline)
+                                        Text("\(athlete.school)")
+                                    }
+                                    Spacer()
+                                    Text("\(athlete.bestResult)")
+                                }
+                            }
                         }
-                        Spacer()
-                        Text("\(athlete.bestResult)")
                     }
+                    .navigationTitle("Results")
+                    .navigationBarItems(trailing:
+                        Button("Done") {
+                            reinvokeBody.toggle()
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    )
                 }
             }
-            .navigationTitle("Results")
-            .navigationBarItems(trailing:
-                Button("Done") {
-                    reinvokeBody.toggle()
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
         }
     }
 }

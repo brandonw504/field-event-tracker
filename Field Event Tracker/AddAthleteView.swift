@@ -17,34 +17,52 @@ struct AddAthleteView: View {
     
     @State private var name = ""
     @State private var school = 0
+    @State private var showingAlert = false
     
     var body: some View {
-        NavigationView {
-            Form {
-                TextField("Name", text: $name)
-                
-                Section(header: Text("Choose School")) {
-                    Picker("Choose School", selection: $school) {
-                        ForEach(0 ..< meets.meets[meetID].schools.count) {
-                            Text("\(meets.meets[meetID].schools[$0])")
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                NavigationView {
+                    Form {
+                        TextField("Name", text: $name)
+                        
+                        Section(header: Text("Choose School")) {
+                            if meets.meets[meetID].schools.count > 3 {
+                                Picker("Choose School", selection: $school) {
+                                    ForEach(0 ..< meets.meets[meetID].schools.count) {
+                                        Text("\(meets.meets[meetID].schools[$0])")
+                                    }
+                                }
+                            } else {
+                                Picker("Choose School", selection: $school) {
+                                    ForEach(0 ..< meets.meets[meetID].schools.count) {
+                                        Text("\(meets.meets[meetID].schools[$0])")
+                                    }
+                                }
+                                .pickerStyle(SegmentedPickerStyle())
+                            }
                         }
                     }
-                    .pickerStyle(SegmentedPickerStyle())
+                    .navigationTitle("Add Athlete")
+                    .navigationBarItems(leading: Button("Cancel") {
+                        presentationMode.wrappedValue.dismiss()
+                    }, trailing:
+                        Button("Save") {
+                            if name.isEmpty {
+                                showingAlert = true
+                            } else {
+                                meets.meets[meetID].events[eventID].athletes.append(Athlete(id: meets.meets[meetID].events[eventID].athletes.count, name: name, school: meets.meets[meetID].schools[school], results: [Mark](), resultsString: [String]()))
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                        }
+                    )
+                }
+                .environmentObject(meets)
+                .alert(isPresented: $showingAlert) {
+                    Alert(title: Text("Error"), message: Text("You need to enter the athlete's name."), dismissButton: .default(Text("OK")))
                 }
             }
-            .navigationTitle("Add Athlete")
-            .navigationBarItems(leading: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            }, trailing:
-                Button("Save") {
-                    if !name.isEmpty {
-                        meets.meets[meetID].events[eventID].athletes.append(Athlete(id: meets.meets[meetID].events[eventID].athletes.count, name: name, school: meets.meets[meetID].schools[school], results: [Mark](), resultsString: [String]()))
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            )
         }
-        .environmentObject(meets)
     }
 }
 

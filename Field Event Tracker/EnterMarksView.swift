@@ -32,93 +32,106 @@ struct EnterMarksView: View {
     @State private var scratch = false
     
     var body: some View {
-        Form {
-            Section(header: Text("Marks")) {
-                List {
-                    ForEach(meets.meets[meetID].events[eventID].athletes[athleteID].resultsString, id: \.self) { result in
-                        Text("\(result)")
-                    }
-                    .onDelete(perform: removeRows)
-                }
-            }
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                if meets.meets[meetID].events[eventID].athletes.count > athleteID {
+                    Form {
+                        Section(header: Text("Marks")) {
+                            List {
+                                ForEach(meets.meets[meetID].events[eventID].athletes[athleteID].resultsString, id: \.self) { result in
+                                    Text("\(result)")
+                                }
+                                .onDelete(perform: removeRows)
+                            }
+                        }
 
-            Section(header: Text("Enter Marks")) {
-                VStack {
-                    List {
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Toggle("Scratch", isOn: $scratch)
-                                if !scratch {
-                                    Spacer()
-                                    Divider()
-                                    Spacer()
-                                    Toggle("Wind", isOn: $hasWind)
+                        Section(header: Text("Enter Marks")) {
+                            List {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Toggle("Scratch", isOn: $scratch)
+                                        if !scratch {
+                                            Spacer()
+                                            Divider()
+                                            Spacer()
+                                            Toggle("Wind", isOn: $hasWind)
+                                        }
+                                    }
+                                    
+                                    if !scratch {
+                                        HStack {
+                                            Picker("Select Feet", selection: $feet) {
+                                                ForEach(0 ..< 351) {
+                                                    Text("\($0)")
+                                                }
+                                            }
+                                            .pickerStyle(MenuPickerStyle())
+                                            Spacer()
+                                            Text("\(feet)")
+                                        }
+                                        
+                                        HStack {
+                                            Picker("Select Inches", selection: $inches) {
+                                                ForEach(0 ..< inchesIncrements.count) {
+                                                    Text("\(inchesIncrements[$0], specifier: "%.2f")")
+                                                }
+                                            }
+                                            .pickerStyle(MenuPickerStyle())
+                                            Spacer()
+                                            Text("\(inchesIncrements[inches], specifier: "%.2f")")
+                                        }
+
+                                        if hasWind {
+                                            HStack {
+                                                Picker("Select Wind", selection: $wind) {
+                                                    ForEach(0 ..< windIncrements.count) {
+                                                        Text("\(windIncrements[$0], specifier: "%.1f")")
+                                                    }
+                                                }
+                                                .pickerStyle(MenuPickerStyle())
+                                                Spacer()
+                                                Text("\(windIncrements[wind], specifier: "%.1f")")
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             
-                            if !scratch {
-                                HStack {
-                                    Picker("Select Feet", selection: $feet) {
-                                        ForEach(0 ..< 351) {
-                                            Text("\($0)")
-                                        }
-                                    }
-                                    .pickerStyle(MenuPickerStyle())
-                                    Spacer()
-                                    Text("\(feet)")
-                                }
-                                
-                                HStack {
-                                    Picker("Select Inches", selection: $inches) {
-                                        ForEach(0 ..< inchesIncrements.count) {
-                                            Text("\(inchesIncrements[$0], specifier: "%.2f")")
-                                        }
-                                    }
-                                    .pickerStyle(MenuPickerStyle())
-                                    Spacer()
-                                    Text("\(inchesIncrements[inches], specifier: "%.2f")")
-                                }
-
-                                if hasWind {
-                                    HStack {
-                                        Picker("Select Wind", selection: $wind) {
-                                            ForEach(0 ..< windIncrements.count) {
-                                                Text("\(windIncrements[$0], specifier: "%.1f")")
-                                            }
-                                        }
-                                        .pickerStyle(MenuPickerStyle())
-                                        Spacer()
-                                        Text("\(windIncrements[wind], specifier: "%.1f")")
+                            Button("Add Mark") {
+                                withAnimation(.default) {
+                                    if scratch {
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].results.append(Mark(id: meets.meets[meetID].events[eventID].athletes[athleteID].results.count, feet: nil, inches: nil, wind: nil))
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.append("Scratch")
+                                    } else if !hasWind {
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].results.append(Mark(id: meets.meets[meetID].events[eventID].athletes[athleteID].results.count, feet: feet, inches: inchesIncrements[inches], wind: nil))
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.append("\(String(feet))' \(String(inchesIncrements[inches]))\"")
+                                    } else {
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].results.append(Mark(id: meets.meets[meetID].events[eventID].athletes[athleteID].results.count, feet: feet, inches: inchesIncrements[inches], wind: windIncrements[wind].rounded(toPlaces: 1)))
+                                        meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.append("\(String(feet))' \(String(inchesIncrements[inches]))\" (\(String(windIncrements[wind].rounded(toPlaces: 1))))")
                                     }
                                 }
                             }
                         }
                     }
-                    
-                    Divider()
-
-                    Button("Add Mark") {
-                        if scratch {
-                            meets.meets[meetID].events[eventID].athletes[athleteID].results.append(Mark(id: meets.meets[meetID].events[eventID].athletes[athleteID].results.count, feet: nil, inches: nil, wind: nil))
-                            meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.append("Scratch")
-                        } else {
-                            meets.meets[meetID].events[eventID].athletes[athleteID].results.append(Mark(id: meets.meets[meetID].events[eventID].athletes[athleteID].results.count, feet: feet, inches: inchesIncrements[inches], wind: windIncrements[wind].rounded(toPlaces: 1)))
-                            meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.append("\(String(feet))' \(String(inchesIncrements[inches]))\" (\(String(windIncrements[wind].rounded(toPlaces: 1))))")
-                        }
-                    }
+                    .navigationTitle("Enter Information")
+                    .environmentObject(meets)
                 }
             }
         }
-        .navigationTitle("Enter Information")
-        .environmentObject(meets)
     }
     
     func removeRows(at offsets: IndexSet) {
-        offsets.forEach {
-            meets.meets[meetID].events[eventID].athletes[athleteID].results.remove(at: $0)
-            meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.remove(at: $0)
-            for i in $0 ..< meets.meets[meetID].events[eventID].athletes[athleteID].results.count {
-                meets.meets[meetID].events[eventID].athletes[athleteID].results[i].id -= 1
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                if meets.meets[meetID].events[eventID].athletes.count > athleteID {
+                    offsets.forEach {
+                        meets.meets[meetID].events[eventID].athletes[athleteID].results.remove(at: $0)
+                        meets.meets[meetID].events[eventID].athletes[athleteID].resultsString.remove(at: $0)
+                        for i in $0 ..< meets.meets[meetID].events[eventID].athletes[athleteID].results.count {
+                            meets.meets[meetID].events[eventID].athletes[athleteID].results[i].id -= 1
+                        }
+                    }
+                }
             }
         }
     }

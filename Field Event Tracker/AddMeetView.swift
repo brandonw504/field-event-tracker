@@ -16,6 +16,7 @@ struct AddMeetView: View {
     @State private var location = ""
     @State private var schools = [String]()
     @State private var newSchool = ""
+    @State private var showingAlert = false
     
     var body: some View {
         NavigationView {
@@ -33,6 +34,7 @@ struct AddMeetView: View {
                         ForEach(schools, id: \.self) { school in
                             Text("\(school)")
                         }
+                        .onDelete(perform: removeRows)
                         
                         HStack {
                             TextField("School Name", text: $newSchool)
@@ -56,11 +58,22 @@ struct AddMeetView: View {
                 presentationMode.wrappedValue.dismiss()
             }, trailing:
                 Button("Save") {
-                    meets.meets.append(Meet(id: meets.meets.count, name: name, location: location, date: date, schools: schools, events: [Event]()))
-                    presentationMode.wrappedValue.dismiss()
+                    if name.isEmpty || location.isEmpty || schools.isEmpty {
+                        showingAlert = true
+                    } else {
+                        meets.meets.append(Meet(id: meets.meets.count, name: name, location: location, date: date, schools: schools, events: [Event]()))
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             )
+            .alert(isPresented: $showingAlert) {
+                Alert(title: Text("Error"), message: Text("You need to fill out all text fields."), dismissButton: .default(Text("OK")))
+            }
         }
+    }
+    
+    func removeRows(at offsets: IndexSet) {
+        schools.remove(atOffsets: offsets)
     }
 }
 

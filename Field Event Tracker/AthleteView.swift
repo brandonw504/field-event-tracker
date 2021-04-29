@@ -27,45 +27,52 @@ struct AthleteView: View {
     @State private var activeSheet: ActiveSheet?
     
     var body: some View {
-        Form {
-            ForEach(meets.meets[meetID].events[eventID].athletes) { athlete in
-                NavigationLink(destination: EnterMarksView(meetID: meetID, eventID: eventID, athleteID: athlete.id)) {
-                    VStack(alignment: .leading) {
-                        Text("\(athlete.name)")
-                            .font(.headline)
-                        Text("\(athlete.school)")
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                Form {
+                    ForEach(meets.meets[meetID].events[eventID].athletes) { athlete in
+                        NavigationLink(destination: EnterMarksView(meetID: meetID, eventID: eventID, athleteID: athlete.id)) {
+                            VStack(alignment: .leading) {
+                                Text("\(athlete.name)")
+                                    .font(.headline)
+                                Text("\(athlete.school)")
+                            }
+                        }
+                    }
+                    .onDelete(perform: removeRows)
+                    
+                    Button("Add Athlete") {
+                        activeSheet = .addAthlete
                     }
                 }
-            }
-            .onDelete(perform: removeRows)
-            
-            Button("Add Athlete") {
-                activeSheet = .addAthlete
-            }
-        }
-        .navigationTitle("\(event)")
-        .navigationBarItems(trailing:
-            Button("Results") {
-                activeSheet = .results
-            }
-        )
-        .sheet(item: $activeSheet) { item in
-            switch item {
-            case .results:
-                ResultsView(meetID: meetID, eventID: eventID)
-            case .addAthlete:
-                AddAthleteView(meetID: meetID, eventID: eventID)
+                .navigationTitle("\(event)")
+                .navigationBarItems(trailing:
+                    Button("Results") {
+                        activeSheet = .results
+                    }
+                )
+                .sheet(item: $activeSheet) { item in
+                    switch item {
+                    case .results:
+                        ResultsView(meetID: meetID, eventID: eventID)
+                    case .addAthlete:
+                        AddAthleteView(meetID: meetID, eventID: eventID)
+                    }
+                }
+                .environmentObject(meets)
             }
         }
-        .environmentObject(meets)
     }
     
     func removeRows(at offsets: IndexSet) {
-        meets.meets[meetID].events[eventID].athletes.remove(atOffsets: offsets)
-        offsets.forEach {
-            meets.meets[meetID].events[eventID].athletes.remove(at: $0)
-            for i in $0 ..< meets.meets[meetID].events[eventID].athletes.count {
-                meets.meets[meetID].events[eventID].athletes[i].id -= 1
+        if meets.meets.count > meetID {
+            if meets.meets[meetID].events.count > eventID {
+                offsets.forEach {
+                    meets.meets[meetID].events[eventID].athletes.remove(at: $0)
+                    for i in $0 ..< meets.meets[meetID].events[eventID].athletes.count {
+                        meets.meets[meetID].events[eventID].athletes[i].id -= 1
+                    }
+                }
             }
         }
     }

@@ -16,37 +16,40 @@ struct EventsView: View {
     @State private var showingAddEventView = false
     
     var body: some View {
-        Form {
-            ForEach(meets.meets[meetID].events) { event in
-                NavigationLink(destination: AthleteView(meetID: meetID, eventID: event.id, event: event.name)) {
-                    VStack(alignment: .leading) {
-                        Text("\(event.division) \(event.name)")
-                            .font(.headline)
-                        Text("\(event.gender)")
+        if meets.meets.count > meetID {
+            Form {
+                ForEach(meets.meets[meetID].events) { event in
+                    NavigationLink(destination: AthleteView(meetID: meetID, eventID: event.id, event: event.name)) {
+                        VStack(alignment: .leading) {
+                            Text("\(event.division) \(event.name)")
+                                .font(.headline)
+                            Text("\(event.gender)")
+                        }
                     }
                 }
+                .onDelete(perform: removeRows)
             }
-            .onDelete(perform: removeRows)
-        }
-        .navigationTitle("Events")
-        .navigationBarItems(trailing:
-            Button(action: {
-                showingAddEventView = true
-            }) {
-                Image(systemName: "plus")
+            .navigationTitle("Events")
+            .navigationBarItems(trailing:
+                Button(action: {
+                    showingAddEventView = true
+                }) {
+                    Image(systemName: "plus")
+                }
+            )
+            .sheet(isPresented: $showingAddEventView) {
+                AddEventView(meetID: meetID)
             }
-        )
-        .sheet(isPresented: $showingAddEventView) {
-            AddEventView(meetID: meetID)
         }
     }
     
     func removeRows(at offsets: IndexSet) {
-        meets.meets[meetID].events.remove(atOffsets: offsets)
-        offsets.forEach {
-            meets.meets[meetID].events.remove(at: $0)
-            for i in $0 ..< meets.meets[meetID].events.count {
-                meets.meets[meetID].events[i].id -= 1
+        if meets.meets.count > meetID {
+            offsets.forEach {
+                meets.meets[meetID].events.remove(at: $0)
+                for i in $0 ..< meets.meets[meetID].events.count {
+                    meets.meets[meetID].events[i].id -= 1
+                }
             }
         }
     }

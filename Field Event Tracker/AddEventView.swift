@@ -24,43 +24,45 @@ struct AddEventView: View {
     @State private var division = 0
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Event")) {
-                    Picker("Choose Event", selection: $event) {
-                        ForEach(0 ..< events.count) {
-                            Text("\(events[$0])")
+        if meets.meets.count > meetID {
+            NavigationView {
+                Form {
+                    Section(header: Text("Event")) {
+                        Picker("Choose Event", selection: $event) {
+                            ForEach(0 ..< events.count) {
+                                Text("\(events[$0])")
+                            }
                         }
                     }
-                }
-                
-                Section(header: Text("Gender")) {
-                    Picker("Choose Gender", selection: $gender) {
-                        ForEach(0 ..< genders.count) {
-                            Text("\(genders[$0])")
+                    
+                    Section(header: Text("Gender")) {
+                        Picker("Choose Gender", selection: $gender) {
+                            ForEach(0 ..< genders.count) {
+                                Text("\(genders[$0])")
+                            }
                         }
+                        .pickerStyle(SegmentedPickerStyle())
                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                Section(header: Text("Division")) {
-                    Picker("Choose Division", selection: $division) {
-                        ForEach(0 ..< divisions.count) {
-                            Text("\(divisions[$0])")
+                    
+                    Section(header: Text("Division")) {
+                        Picker("Choose Division", selection: $division) {
+                            ForEach(0 ..< divisions.count) {
+                                Text("\(divisions[$0])")
+                            }
                         }
+                        .pickerStyle(SegmentedPickerStyle())
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                 }
-            }
-            .navigationTitle("Add Event")
-            .navigationBarItems(leading: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            }, trailing:
-                Button("Save") {
-                    meets.meets[meetID].events.append(Event(id: meets.meets[meetID].events.count, name: events[event], gender: genders[gender], division: divisions[division], athletes: [Athlete]()))
+                .navigationTitle("Add Event")
+                .navigationBarItems(leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
-                }
-            )
+                }, trailing:
+                    Button("Save") {
+                        meets.meets[meetID].events.append(Event(id: meets.meets[meetID].events.count, name: events[event], gender: genders[gender], division: divisions[division], athletes: [Athlete]()))
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                )
+            }
         }
     }
 }
